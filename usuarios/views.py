@@ -1,8 +1,7 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.contrib import auth, messages
 from django.contrib.auth.models import User
-from django.contrib import messages
 from django.contrib.messages import constants
+from django.shortcuts import redirect, render
 from django.urls import reverse
 
 
@@ -48,3 +47,21 @@ def cadastro(request):
         )
 
         return redirect(reverse('login'))
+
+
+def login(request):
+    if request.method == "GET":
+        return render(request, 'login.html')
+    elif request.method == "POST":
+        username = request.POST.get('username')
+        senha = request.POST.get('senha')
+
+        user = auth.authenticate(username=username, password=senha)
+
+        if not user:
+            messages.add_message(request, constants.ERROR,
+                                 'Username ou senha inválidos')
+            return redirect(reverse('login'))
+
+        auth.login(request, user)
+        return redirect('/eventos/novo_evento/')
